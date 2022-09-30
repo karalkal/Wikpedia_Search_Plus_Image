@@ -1,0 +1,114 @@
+@import url("https://fonts.googleapis.com/css2?family=Mr+Dafoe&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Exo:wght@900&display=swap");
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: rgb(40, 35, 136);
+    background: radial-gradient(circle,
+            rgba(40, 35, 136, 1) 0%,
+            rgba(36, 42, 148, 1) 57%,
+            rgba(11, 30, 75, 1) 100%);
+    font-size: clamp(10px, 2vw, 20px);
+}
+
+#h1 {
+    font-family: "Bungee Spice", cursive;
+    display: flex;
+    justify-content: center;
+    margin-top: 250px;
+}
+
+#description {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+    font-size: medium;
+    font-family: 'Chakra Petch', sans-serif;
+    color: aliceblue;
+
+}
+
+#searchForm {
+    display: flex;
+    justify-content: center;
+}
+
+#searchBar {
+    width: 400px;
+    height: 20px;
+    padding: 10px 30px;
+    background-color: aliceblue;
+    border-radius: 15px;
+    margin-right: 5px;
+}
+
+#submitBtn {
+    width: 100px;
+    padding: 10px 30px;
+    transition: 0.5s;
+    border-radius: 15px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+#submitBtn:hover {
+    background: var(--clr);
+    letter-spacing: 0.25em;
+    box-shadow: 0 0 35px var(--clr)
+}
+
+#submitBtn2 {
+    width: 150px;
+    padding: 10px 30px;
+    transition: 0.5s;
+    border-radius: 15px;
+    text-align: center;
+    display: none;
+}
+
+#submitBtn2:hover {
+    background: var(--clr);
+    letter-spacing: 0.25em;
+    box-shadow: 0 0 35px var(--clr)
+}
+
+.card-thumbnail {
+    width: 100%;
+    height: 17vw;
+    border-bottom: 2px solid rgba(0, 0, 0, .26);
+}
+
+.card-thumbnail img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+
+}
+
+card-body {
+    height: 31vh;
+}
+
+.card-body .card-title {
+    border-bottom: 2px solid rgba(0, 0, 0, .26);
+    height: 11vh;
+}
+
+.card-body .card-text {
+    height: 15vh;
+}
+
+.link-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+@media (max-width: 1200px) {
+    .card-title {
+        font-size:large;
+    }
+}

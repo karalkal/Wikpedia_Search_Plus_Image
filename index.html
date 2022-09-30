@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./img/icons/icons8-search-3d-fluency-120.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./img/icons/icons8-search-3d-fluency-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./img/icons/icons8-search-3d-fluency-16.png">
+
+    <!-- Styles and Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@1,500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <script src="./src/index.js" defer></script>
+
+    <title>Wiki Experiment</title>
+</head>
+
+<body>
+    <div id="h1">
+        <h1><span class="auto-type"></span></h1>
+    </div>
+
+    <br />
+    <div id="description">
+        <h3>
+            <span id="h3content"></span>
+        </h3>
+    </div>
+
+    <div id="form">
+        <form action="" id="searchForm">
+            <input id="searchBar" style="height: 3em; margin-right: 35px;" type="text" placeholder="Search term"
+                id="searchTerm" name="searchTerm" />
+            <input id="submitBtn" style="--clr:#F48D06" type="submit" value="GO!" />
+            <input id="submitBtn2" style="--clr:#F48D06" type="submit" value="Random" />
+        </form>
+    </div>
+
+    <section class="bg-light py-4 my-5" id="results">
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <script>
+        let typed = new Typed(".auto-type", {
+            strings: ["Wikipedia", "Fake Wikipedia"],
+            typeSpeed: 100,
+            backSpeed: 100,
+            loop: false
+        })
+
+        let typed2 = new Typed("#h3content", {
+            strings: ["This is a basic experiment based on Wikipedia's API.",
+                "It displays the first 12 results for user-generated search term... ",
+                "... including the relevant article image (if present).",
+                "Please search for anything!"],
+            startDelay: 3500,
+            typeSpeed: 44,
+            loop: false,
+        })
+
+    </script>
+</body>
+
+</html>
