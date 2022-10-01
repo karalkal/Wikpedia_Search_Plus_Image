@@ -1,6 +1,6 @@
 Project Title
 -----------------
-    Wikipedia Experiment
+    Wikipedia Search + Image  
 
 N.B.
 -----------------

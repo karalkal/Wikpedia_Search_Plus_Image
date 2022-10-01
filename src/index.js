@@ -1,55 +1,108 @@
-const form = document.getElementById('searchForm')
-const submitBtn = document.querySelector('#submitBtn')
-const randBtn = document.querySelector('#submitBtn2');
-const resultsSection = document.getElementById('results')
 const baseUrl = "https://en.wikipedia.org/w/api.php";
 
-let keyword = ""
+const form = document.getElementById('searchForm')
+const randomBtn = document.getElementById('randomBtn')
 
-submitBtn.addEventListener('click', (e) => {
+const mainSection = document.getElementById('results')
+mainSection.classList.add("m-5", "container-sm")
+
+const rowResultsTitle = document.createElement('div')
+const colResultsTitle = document.createElement('div')
+
+rowResultsTitle.className = "row"
+colResultsTitle.className = "col-12"
+
+const rowResultsGallery = document.createElement('div')
+rowResultsGallery.classList.add("row", "justify-content-center")
+
+const h3 = document.createElement('h3')                 // title of results section
+h3.classList.add("mt-3", "results-title")
+
+let hasFoundArticles = false
+let displayRandom = true
+
+
+getLastFeatured() // get featured articles on startup
+
+form.addEventListener('submit', (e) => {
     e.preventDefault()
+
+    displayRandom = false
 
     let formData = new FormData(form)
     let searchTerm = formData.get('searchTerm')
-    keyword = searchTerm;
-    // form.reset()
 
-    fetchData(searchTerm)
-
-    randBtn.style.display = "initial"
-})
-
-randBtn.addEventListener('click', (e) => {
-    e.preventDefault()
-    
     form.reset()
 
-    fetchData(keyword, false)
+    performSearch(searchTerm)
 })
 
-async function decodeDataRandom(foundData) {
+randomBtn.addEventListener('click', getLastFeatured)
 
-    prepareResultsSection()     // create section in html where resutls will be displayed
 
-    const foundArticle  = foundData.query.search[Math.floor(Math.random()*foundData.query.search.length)];
+async function getLastFeatured() {
+    hasFoundArticles = false
+    displayRandom = true
 
-        let articleTitle = foundArticle.title
+    prepareResultsSection()
 
-        let articleText = foundArticle.snippet
-            .replace(/(<([^>]+)>)/gi, "")               // strip html tags from 
-            .slice(0, 130) + "...";                      // truncate text
+    const today = new Date(new Date().getTime());
+    let currentDay = today
 
-        let pageID = Number(foundArticle.pageid)
+    // expolore last 12 days
+    for (let i = 0; i < 12; i++) {
+        currentDay.setDate(today.getDate() - 1);
 
-        let articleUrl = 'https://en.wikipedia.org/?curid=' + pageID
+        const year = currentDay.getFullYear()
+        const month = (currentDay.getMonth() + 1)
+            .toString()
+            .padStart(2, '0')
+        const day = currentDay.getDate()
+            .toString()
+            .padStart(2, '0')
 
-        let imgUrl = await getArticleImage(articleTitle, pageID)
-        // console.log(imgUrl)
+        // console.log("day:", day)
 
-        generateCard(articleTitle, articleText, articleUrl, imgUrl)
+        let url = `https://api.wikimedia.org/feed/v1/wikipedia/en/featured/${year}/${month}/${day}`;
+
+        try {
+            let response = await fetch(url);
+            if (response.ok == false) {
+                let error = response.json()
+                throw new Error(error.message)
+            }
+
+            let data = await response.json()
+            // the response can include the daily featured article, featured image or media file, list of most read articles, latest news stories, and events from that day in history. 
+            let featuredThisDay = data.mostread.articles
+
+            // limit search to 10 most popular rather than all 40+ featured articles
+            let randNo = Math.floor(Math.random() * 10)
+
+            let articleTitle = featuredThisDay[randNo].title.replace(/_/g, " ")
+            let articleText = featuredThisDay[randNo]
+                .extract
+                .slice(0, 170) + "...";                         // truncate text
+            let articleUrl = featuredThisDay[randNo].content_urls.desktop.page
+
+            let imgURL
+            try {
+                imgURL = featuredThisDay[randNo].originalimage.source
+                // console.log(data.query.pages[String(pageID)].thumbnail.source)
+            } catch (err) {
+                imgURL = '../img/default.jpg'
+            }
+            generateCard(articleTitle, articleText, articleUrl, imgURL)
+
+        } catch (error) {
+            alert(error.message)
+        }
     }
+    mainSection.appendChild(rowResultsGallery)
 
-function fetchData(searchTerm, flag=true) {
+}
+
+function performSearch(searchTerm) {
 
     let params = {
         action: "query",
@@ -66,107 +119,89 @@ function fetchData(searchTerm, flag=true) {
 
     fetch(url)
         .then(response => response.json())
-        .then(x=> {
-            flag === true ? decodeData(x) : decodeDataRandom(x);
-        })
+        .then(processFoundData)
 
         .catch(function (error) { console.log(`${error.name}:\n${error.message}`); });
 }
 
+async function processFoundData(foundData) {
+    let foundArticles = foundData.query.search              // could be undefined
+    hasFoundArticles = Boolean(foundArticles.length)
 
-async function decodeData(foundData) {
+    prepareResultsSection(hasFoundArticles)
+    // create section in html where resutls will be displayed depending on if there are any or none
+    // then displayRandom will be disabled
 
-    prepareResultsSection()     // create section in html where resutls will be displayed
+    for (let artcl of foundArticles) {                      // if none will not run 
+        let articleTitle = artcl.title
 
-    for (let foundArticle of foundData.query.search) {
-        // console.log(foundData)
-        let articleTitle = foundArticle.title
+        let articleText = artcl.snippet
+            .replace(/(<([^>]+)>)/ig, "")                   // strip html tags from snippet
+            .slice(0, 170) + "...";                         // truncate text
 
-        let articleText = foundArticle.snippet
-            .replace(/(<([^>]+)>)/gi, "")               // strip html tags from 
-            .slice(0, 130) + "...";                      // truncate text
-
-        let pageID = Number(foundArticle.pageid)
+        let pageID = Number(artcl.pageid)
 
         let articleUrl = 'https://en.wikipedia.org/?curid=' + pageID
 
         let imgUrl = await getArticleImage(articleTitle, pageID)
-        // console.log(imgUrl)
 
         generateCard(articleTitle, articleText, articleUrl, imgUrl)
     }
+    mainSection.appendChild(rowResultsGallery)
+
 }
 
 async function getArticleImage(title, pageID) {
     let url = baseUrl + "?origin=*" + `&action=query&format=json&prop=pageimages&titles=${title}&pithumbsize=260`;        // "?origin=*" to resolve cors cross-origin request issues
-    let imgURL
-
     let res = await fetch(url)
     let data = await res.json()
+
+    let imgURL
     try {
         imgURL = data.query.pages[String(pageID)].thumbnail.source
-        // console.log(data.query.pages[String(pageID)].thumbnail.source)
     } catch (err) {
         imgURL = '../img/default.jpg'
     }
-
-    // console.log(imgURL)
     return imgURL
 }
 
-function prepareResultsSection() {
-    resultsSection.textContent = ''
-    let containerDiv = document.createElement('div')
-    let rowDiv = document.createElement('div')
-    let colDiv = document.createElement('div')
-    let h2 = document.createElement('h2')
+function prepareResultsSection(hasFoundArticles) {
+    // clear results section
+    mainSection.textContent = ''
+    rowResultsTitle.innerHTML = ''
+    rowResultsGallery.innerHTML = ''
+    h3.textContent = ''
 
-    containerDiv.className = "container"
-    rowDiv.className = "row"
-    rowDiv.id = "found"
-    colDiv.className = "col-12"
-    h2.classList.add("mb-3", "text-danger")
-    h2.textContent = "Your results: "
-    colDiv.appendChild(h2)
-    rowDiv.appendChild(colDiv)
-    containerDiv.appendChild(rowDiv)
-    resultsSection.appendChild(containerDiv)
-    /*
-        resultsSection.innerHTML = `
-        <div class="container">
-            <div class="row" id="found">
-                <div class="col-12">
-                    <h2 class="mb-3 text-danger">Your results: </h2>
-                </div>
-            </div>
-        </div>
-        `
-    */
+    console.log(hasFoundArticles, displayRandom)
+
+    if (!hasFoundArticles && displayRandom) {            //initial state or when user has clicked button
+        h3.textContent = "Some popular articles from last 12 days: "
+    } else if (hasFoundArticles && !displayRandom) {            //if successful search don's display random
+        h3.textContent = "Your search results: "
+    } else if (!hasFoundArticles && !displayRandom) {
+        h3.textContent = 'No results found.'
+    }
+
+    colResultsTitle.appendChild(h3)
+    rowResultsTitle.appendChild(colResultsTitle)
+    mainSection.appendChild(rowResultsTitle)
 }
 
 
 function generateCard(title, text, url, img) {
-    let foundDiv = document.getElementById('found')
-    // console.log(title, text, url)
-
-    if (!title || !text || !url) {
-        foundDiv.textContent = 'No results found'
-    } else {
-        foundDiv.innerHTML += `
+    // console.log(title, text, url, img)
+    rowResultsGallery.innerHTML += `
         <div class="col-sm-12 col-md-6 col-lg-4" >
-            <div class="card my-3">
+            <div class="card m-5 p-2">
                 <div class="card-thumbnail">
                     <img src="${img}" class="img-fluid" alt="${title}">
                 </div>
                 <div class="card-body">
-                    <h3 class="card-title fs-4">${title}</h3>
+                    <h4 class="card-title fs-4">${title}</h4>
                     <p class="card-text">${text}</p>
-                    <a href="${url}" target="blank" class="btn btn-info link-btn">Read More</a>
+                    <a href="${url}" target="blank" class="btn link-btn">Read More</a>
                 </div>
             </div>
         </div >
         `
-    }
 }
-
-
